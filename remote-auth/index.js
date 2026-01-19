@@ -136,7 +136,7 @@ const handleRequest = async (request) => {
         console.debug(checkAuthUrl)
 
         // load cookie
-        const cookies = new Cookies(request.headers.get('cookie'), true)
+        const cookies = new Cookies(request.headers.get('cookie'))
         const sessionID = cookies.get(env.ovincApiCookieName)
         console.debug(env.ovincApiCookieName)
         console.debug(sessionID.value)
