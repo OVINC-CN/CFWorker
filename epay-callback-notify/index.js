@@ -10,7 +10,7 @@ async function md5(text) {
 // verify signature
 async function verifySignature(params, secret) {
     // load sign and sign_type and remove them from params
-    const {sign, sign_type, ...otherParams} = params;
+    const { sign, sign_type: _signType, ...otherParams } = params;
     if (!sign) {
         return false;
     }
@@ -44,38 +44,36 @@ async function parseRequestParams(request) {
             params[key] = value;
         }
         return params;
-    } else {
-        // parse body
-        const contentType = request.headers.get('content-type') || '';
-        // handle json or form-urlencoded
-        if (contentType.includes('application/json')) {
-            return await request.json();
-        } else if (contentType.includes('application/x-www-form-urlencoded')) {
-            const text = await request.text();
-            const params = {};
-            const pairs = text.split('&');
-            for (const pair of pairs) {
-                const [key, value] = pair.split('=');
-                params[decodeURIComponent(key)] = decodeURIComponent(value || '');
-            }
-            return params;
-        } else {
-            const formData = await request.formData();
-            const params = {};
-            for (const [key, value] of formData.entries()) {
-                params[key] = value;
-            }
-            return params;
-        }
     }
+    // parse body
+    const contentType = request.headers.get('content-type') || '';
+    // handle json or form-urlencoded
+    if (contentType.includes('application/json')) {
+        return await request.json();
+    } else if (contentType.includes('application/x-www-form-urlencoded')) {
+        const text = await request.text();
+        const params = {};
+        const pairs = text.split('&');
+        for (const pair of pairs) {
+            const [key, value] = pair.split('=');
+            params[decodeURIComponent(key)] = decodeURIComponent(value || '');
+        }
+        return params;
+    }
+    const formData = await request.formData();
+    const params = {};
+    for (const [key, value] of formData.entries()) {
+        params[key] = value;
+    }
+    return params;
 }
 
 // main handler
 export default {
-    async fetch(request, env, ctx) {
+    async fetch(request, env, _ctx) {
         // only allow GET and POST methods
         if (request.method !== 'GET' && request.method !== 'POST') {
-            return new Response('Method not allowed', {status: 405});
+            return new Response('Method not allowed', { status: 405 });
         }
 
         // load environment variables
@@ -85,7 +83,7 @@ export default {
         const webhookTitle = env.WEBHOOK_TITLE || '支付通知';
         const webhookFields = env.WEBHOOK_FIELDS ? env.WEBHOOK_FIELDS.split(',') : ['name', 'money'];
         if (!secret || !expectedPid || !webhookUrl || webhookFields.length === 0) {
-            return new Response('configuration error', {status: 500});
+            return new Response('configuration error', { status: 500 });
         }
 
         try {
@@ -94,13 +92,13 @@ export default {
 
             // check pid
             if (params.pid !== expectedPid) {
-                return new Response('invalid pid', {status: 400});
+                return new Response('invalid pid', { status: 400 });
             }
 
             // check signature
             const isValid = await verifySignature(params, secret);
             if (!isValid) {
-                return new Response('invalid signature', {status: 400});
+                return new Response('invalid signature', { status: 400 });
             }
 
             // build markdown content
@@ -116,18 +114,17 @@ export default {
             // send to webhook
             const webhookResponse = await fetch(webhookUrl, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({msgtype: 'markdown', markdown: {content: markdownContent}}),
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ msgtype: 'markdown', markdown: { content: markdownContent } }),
             });
             if (!webhookResponse.ok) {
-                return new Response('webhook error', {status: 500});
+                return new Response('webhook error', { status: 500 });
             }
 
             // Return success response
-            return new Response('success', {status: 200});
-
-        } catch (error) {
-            return new Response('internal server error', {status: 500});
+            return new Response('success', { status: 200 });
+        } catch {
+            return new Response('internal server error', { status: 500 });
         }
     },
 };

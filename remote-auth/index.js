@@ -1,5 +1,4 @@
-const buildHTML = () => {
-    return `<!DOCTYPE html>
+const buildHTML = () => `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -68,39 +67,35 @@ const buildHTML = () => {
         <p>系统检测到您的请求存在异常或已被管理员限制</p>
     </div>
 </body>
-</html>`
-}
+</html>`;
 
-const quickFail = async () => {
-    return new Response(buildHTML(), {status: 403, headers: {'Content-Type': 'text/html'}});
-}
+const quickFail = () => new Response(buildHTML(), { status: 403, headers: { 'Content-Type': 'text/html' } });
 
 const handleRequest = async (request) => {
     try {
         // build url
         const checkAuthUrl = `${env.ovincApiHost}/account/user_info/`;
-        console.debug(checkAuthUrl)
+        console.debug(checkAuthUrl);
 
         // load cookie
-        const cookies = new Cookies(request.headers.get('cookie'))
-        const sessionID = cookies.get(env.ovincApiCookieName)
-        console.debug(env.ovincApiCookieName)
-        console.debug(sessionID.value)
+        const cookies = new Cookies(request.headers.get('cookie'));
+        const sessionID = cookies.get(env.ovincApiCookieName);
+        console.debug(env.ovincApiCookieName);
 
         // call api
-        const authResponse = await fetch(checkAuthUrl, {headers: {cookie: `${env.ovincApiCookieName}=${sessionID.value}`}});
+        const authResponse = await fetch(checkAuthUrl, { headers: { cookie: `${env.ovincApiCookieName}=${sessionID.value}` } });
         console.debug(authResponse.status);
 
         // check status
         if (authResponse.status !== 200) {
-            return quickFail()
+            return quickFail();
         }
 
         // check data
-        const respData = await authResponse.json()
-        console.debug(respData)
+        const respData = await authResponse.json();
+        console.debug(respData);
         if (respData.data.username === '') {
-            return quickFail()
+            return quickFail();
         }
 
         // success
@@ -108,15 +103,14 @@ const handleRequest = async (request) => {
             method: request.method,
             headers: request.headers,
             redirect: 'manual',
-            body: request.body
+            body: request.body,
         });
     } catch (e) {
-        console.error(e)
-        return quickFail()
+        console.error(e);
+        return quickFail();
     }
-
-}
+};
 
 addEventListener('fetch', e => {
-    e.respondWith(handleRequest(e.request))
+    e.respondWith(handleRequest(e.request));
 });
