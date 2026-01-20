@@ -72,6 +72,11 @@ const buildHTML = (uuid) => `<!DOCTYPE html>
 
 const quickFail = (uuid) => new Response(buildHTML(uuid), { status: 403, headers: { 'Content-Type': 'text/html' } });
 
+const redirctToLogin = (url) => {
+    const redirectionURL = `${env.zeroTrustLoginPage}?next=${encodeURIComponent(url)}`;
+    return Response.redirect(redirectionURL, 301);
+};
+
 const handleRequest = async (request) => {
     const requestID = request.eo.uuid || '';
     console.debug(requestID);
@@ -88,7 +93,7 @@ const handleRequest = async (request) => {
 
         // check cookie
         if (!sessionID) {
-            return quickFail(requestID);
+            return redirctToLogin(request.url);
         }
 
         // parse url
