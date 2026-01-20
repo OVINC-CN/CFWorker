@@ -74,7 +74,7 @@ const quickFail = (uuid) => new Response(buildHTML(uuid), { status: 403, headers
 
 const redirctToLogin = (url) => {
     const redirectionURL = `${env.zeroTrustLoginPage}?next=${encodeURIComponent(url)}`;
-    return Response.redirect(redirectionURL, 301);
+    return Response.redirect(redirectionURL, 302);
 };
 
 const handleRequest = async (request) => {
