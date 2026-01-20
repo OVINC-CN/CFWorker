@@ -1,9 +1,9 @@
-const buildHTML = (uuid) => `<!DOCTYPE html>
+const buildHTML = (uuid, url) => `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>请求拦截提示</title>
+    <title>身份验证失败</title>
     <style>
         :root {
             --bg-color: #f8f9fa;
@@ -54,32 +54,49 @@ const buildHTML = (uuid) => `<!DOCTYPE html>
             line-height: 1.6;
             margin: 0;
         }
+
+        .redirect-btn {
+            display: ${url ? 'inline-block' : 'none'};
+            margin-top: 24px;
+            padding: 10px 24px;
+            background-color: var(--text-primary);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: var(--font-family);
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .redirect-btn:hover {
+            background-color: var(--text-secondary);
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="icon-box">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
             </svg>
         </div>
-        <h1>访问被拦截</h1>
-        <p>系统检测到您的请求存在异常或已被管理员限制</p>
+        <h1>身份验证失败</h1>
+        <p>无法验证您的身份信息，请登录后重试</p>
         <p style="display: ${uuid ? '' : 'block'}">${uuid || ''}</p>
+        <button class="redirect-btn" onclick="window.location.href='${url || ''}'">前往登录</button>
     </div>
 </body>
 </html>`;
 
-const quickFail = (uuid) => new Response(buildHTML(uuid), { status: 403, headers: { 'Content-Type': 'text/html' } });
-
-const redirctToLogin = (url) => {
-    const redirectionURL = `${env.zeroTrustLoginPage}?next=${encodeURIComponent(url)}`;
-    return Response.redirect(redirectionURL, 302);
-};
+const quickFail = (uuid, url) => new Response(buildHTML(uuid, url), { status: 403, headers: { 'Content-Type': 'text/html' } });
 
 const handleRequest = async (request) => {
-    const requestID = request.eo.uuid || '';
+    const requestID = request?.eo?.uuid || '';
     console.debug(requestID);
+
+    const redirectLoginURL = `${env.zeroTrustLoginPage}?next=${encodeURIComponent(request.url)}`;
+    console.debug(redirectLoginURL);
 
     try {
         // build url
@@ -93,7 +110,7 @@ const handleRequest = async (request) => {
 
         // check cookie
         if (!sessionID) {
-            return redirctToLogin(request.url);
+            return quickFail(requestID, redirectLoginURL);
         }
 
         // parse url
@@ -124,7 +141,7 @@ const handleRequest = async (request) => {
 
         // check status
         if (authResponse.status !== 200) {
-            return quickFail(requestID);
+            return quickFail(requestID, redirectLoginURL);
         }
 
         // success
@@ -136,7 +153,7 @@ const handleRequest = async (request) => {
         });
     } catch (e) {
         console.error(e);
-        return quickFail(requestID);
+        return quickFail(requestID, redirectLoginURL);
     }
 };
 
