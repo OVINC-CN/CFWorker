@@ -1,4 +1,4 @@
-const buildHTML = () => `<!DOCTYPE html>
+const buildHTML = (uuid) => `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -65,42 +65,61 @@ const buildHTML = () => `<!DOCTYPE html>
         </div>
         <h1>访问被拦截</h1>
         <p>系统检测到您的请求存在异常或已被管理员限制</p>
+        <p style="display: ${uuid ? '' : 'block'}">${uuid || ''}</p>
     </div>
 </body>
 </html>`;
 
-const quickFail = () => new Response(buildHTML(), { status: 403, headers: { 'Content-Type': 'text/html' } });
+const quickFail = (uuid) => new Response(buildHTML(uuid), { status: 403, headers: { 'Content-Type': 'text/html' } });
 
 const handleRequest = async (request) => {
+    const requestID = request.eo.uuid || '';
+    console.debug(requestID);
+
     try {
         // build url
-        const checkAuthUrl = `${env.ovincApiHost}/account/user_info/`;
+        const checkAuthUrl = `${env.zeroTrustAPI}/verify`;
         console.debug(checkAuthUrl);
 
         // load cookie
         const cookies = new Cookies(request.headers.get('cookie'));
-        const sessionID = cookies.get(env.ovincApiCookieName);
-        console.debug(env.ovincApiCookieName);
+        const sessionID = cookies.get(env.zeroTrustAPICookieName)?.value || '';
+        console.debug(env.zeroTrustAPICookieName);
 
         // check cookie
-        if (!sessionID || sessionID.value === '') {
-            return quickFail();
+        if (!sessionID) {
+            return quickFail(requestID);
         }
 
+        // parse url
+        const url = new URL(request.url);
+
+        // build payload
+        const payload = {
+            client_ip: request.eo.clientIp || '',
+            method: request.method,
+            host: url.hostname || '',
+            path: url.pathname || '',
+            user_agent: request.headers.get('User-Agent') || '',
+            referer: request.headers.get("Referer") || ''
+        };
+        console.debug(payload);
+        payload['session_id'] = sessionID;
+
         // call api
-        const authResponse = await fetch(checkAuthUrl, { headers: { cookie: `${env.ovincApiCookieName}=${sessionID.value}` } });
+        const authResponse = await fetch(
+            checkAuthUrl,
+            {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                version: 'HTTP/2.0'
+            }
+        );
         console.debug(authResponse.status);
 
         // check status
         if (authResponse.status !== 200) {
-            return quickFail();
-        }
-
-        // check data
-        const respData = await authResponse.json();
-        console.debug(respData);
-        if (respData.data.username === '') {
-            return quickFail();
+            return quickFail(requestID);
         }
 
         // success
@@ -112,7 +131,7 @@ const handleRequest = async (request) => {
         });
     } catch (e) {
         console.error(e);
-        return quickFail();
+        return quickFail(requestID);
     }
 };
 
