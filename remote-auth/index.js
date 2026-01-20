@@ -82,6 +82,11 @@ const handleRequest = async (request) => {
         const sessionID = cookies.get(env.ovincApiCookieName);
         console.debug(env.ovincApiCookieName);
 
+        // check cookie
+        if (!sessionID || sessionID.value === '') {
+            return quickFail();
+        }
+
         // call api
         const authResponse = await fetch(checkAuthUrl, { headers: { cookie: `${env.ovincApiCookieName}=${sessionID.value}` } });
         console.debug(authResponse.status);

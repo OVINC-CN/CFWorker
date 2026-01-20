@@ -31,6 +31,17 @@ export default defineConfig([
         rules: {
             'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
             'complexity': ['error', { max: 20 }],
+            'semi': ['error', 'always'],
+            'curly': ['error', 'all'],
+            'brace-style': ['error', '1tbs', { allowSingleLine: false }],
+            'object-curly-spacing': ['error', 'always'],
+            'keyword-spacing': ['error', { before: true, after: true }],
+            'space-before-blocks': ['error', 'always'],
+            'space-infix-ops': 'error',
+            'indent': ['error', 4],
+            'no-multi-spaces': 'error',
+            'comma-spacing': ['error', { before: false, after: true }],
+            'key-spacing': ['error', { beforeColon: false, afterColon: true }],
         },
     },
 ]);
