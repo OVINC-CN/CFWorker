@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 const buildHTML = (uuid, url) => `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -89,7 +91,7 @@ const buildHTML = (uuid, url) => `<!DOCTYPE html>
 </body>
 </html>`;
 
-const quickFail = (uuid, url) => new Response(buildHTML(uuid, url), { status: 403, headers: { 'Content-Type': 'text/html' } });
+const quickFail = (uuid, url) => new Response(buildHTML(uuid, url), { status: 511, headers: { 'Content-Type': 'text/html' } });
 
 const handleRequest = async (request) => {
     const requestID = request?.eo?.uuid || '';
@@ -123,7 +125,7 @@ const handleRequest = async (request) => {
             host: url.hostname || '',
             path: url.pathname || '',
             user_agent: request.headers.get('User-Agent') || '',
-            referer: request.headers.get("Referer") || ''
+            referer: request.headers.get('Referer') || '',
         };
         console.debug(payload);
         payload['session_id'] = sessionID;
@@ -134,8 +136,8 @@ const handleRequest = async (request) => {
             {
                 method: 'POST',
                 body: JSON.stringify(payload),
-                version: 'HTTP/2.0'
-            }
+                version: 'HTTP/2.0',
+            },
         );
         console.debug(authResponse.status);
 

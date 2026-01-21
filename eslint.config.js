@@ -29,8 +29,12 @@ export default defineConfig([
             },
         },
         rules: {
-            'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
-            'complexity': ['error', { max: 20 }],
+            // Code complexity
+            'complexity': ['error', { max: 25 }],
+            'max-depth': ['error', 4],
+            'max-nested-callbacks': ['error', 3],
+
+            // Code style
             'semi': ['error', 'always'],
             'curly': ['error', 'all'],
             'brace-style': ['error', '1tbs', { allowSingleLine: false }],
@@ -42,6 +46,22 @@ export default defineConfig([
             'no-multi-spaces': 'error',
             'comma-spacing': ['error', { before: false, after: true }],
             'key-spacing': ['error', { beforeColon: false, afterColon: true }],
+            'quotes': ['error', 'single', { avoidEscape: true }],
+            'jsx-quotes': ['error', 'prefer-double'],
+            'comma-dangle': ['error', 'always-multiline'],
+            'eol-last': ['error', 'always'],
+            'no-multiple-empty-lines': ['error', { max: 1, maxEOF: 0 }],
+            'no-trailing-spaces': 'error',
+
+            // Best practices
+            'eqeqeq': ['error', 'always', { null: 'ignore' }],
+            'no-var': 'error',
+            'prefer-const': 'error',
+            'no-console': ['warn', { allow: ['warn', 'error'] }],
+            'no-debugger': 'error',
+            'no-alert': 'warn',
+            'no-eval': 'error',
+            'no-implied-eval': 'error',
         },
     },
 ]);

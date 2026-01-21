@@ -10,8 +10,8 @@ async function md5(text) {
 // verify signature
 async function verifySignature(params, secret) {
     // load sign and sign_type and remove them from params
-    const { sign, sign_type: _signType, ...otherParams } = params;
-    if (!sign) {
+    const { sign, sign_type, ...otherParams } = params;
+    if (!sign || !sign_type) {
         return false;
     }
 
