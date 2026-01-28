@@ -91,7 +91,21 @@ const buildHTML = (uuid, url) => `<!DOCTYPE html>
 </body>
 </html>`;
 
-const quickFail = (uuid, url) => new Response(buildHTML(uuid, url), { status: 511, headers: { 'Content-Type': 'text/html' } });
+const buildJSON = (uuid, url) => {
+    return JSON.stringify({
+        trace: uuid,
+        next: url,
+        error_message: '无法验证您的身份信息，请登录后重试',
+        error: '无法验证您的身份信息，请登录后重试',
+    });
+};
+
+const quickFail = (isAPIRequest, uuid, url) => {
+    if (isAPIRequest) {
+        return new Response(buildJSON(uuid, url), { status: 511, headers: { 'Content-Type': 'application/json' } });
+    }
+    return new Response(buildHTML(uuid, url), { status: 511, headers: { 'Content-Type': 'text/html' } });
+};
 
 const handleRequest = async (request) => {
     const requestID = request?.eo?.uuid || '';
@@ -99,6 +113,9 @@ const handleRequest = async (request) => {
 
     const redirectLoginURL = `${env.zeroTrustLoginPage}?next=${encodeURIComponent(request.url)}`;
     console.debug(redirectLoginURL);
+
+    const url = new URL(request.url);
+    const isAPIRequest = request.headers.get('Accept')?.includes('application/json') || url.pathname.startsWith('/api/');
 
     try {
         // build url
@@ -112,11 +129,8 @@ const handleRequest = async (request) => {
 
         // check cookie
         if (!sessionID) {
-            return quickFail(requestID, redirectLoginURL);
+            return quickFail(isAPIRequest, requestID, redirectLoginURL);
         }
-
-        // parse url
-        const url = new URL(request.url);
 
         // build payload
         const payload = {
@@ -143,7 +157,7 @@ const handleRequest = async (request) => {
 
         // check status
         if (authResponse.status !== 200) {
-            return quickFail(requestID, redirectLoginURL);
+            return quickFail(isAPIRequest, requestID, redirectLoginURL);
         }
 
         // success
@@ -155,7 +169,7 @@ const handleRequest = async (request) => {
         });
     } catch (e) {
         console.error(e);
-        return quickFail(requestID, redirectLoginURL);
+        return quickFail(isAPIRequest, requestID, redirectLoginURL);
     }
 };
 
