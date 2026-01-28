@@ -93,16 +93,18 @@ const buildHTML = (uuid, url) => `<!DOCTYPE html>
 
 const buildJSON = (uuid, url) => {
     return JSON.stringify({
+        code: 511,
         trace: uuid,
         next: url,
         error_message: '无法验证您的身份信息，请登录后重试',
-        error: '无法验证您的身份信息，请登录后重试',
+        detail: '无法验证您的身份信息，请登录后重试',
+        message: '无法验证您的身份信息，请登录后重试',
     });
 };
 
 const quickFail = (isAPIRequest, uuid, url) => {
     if (isAPIRequest) {
-        return new Response(buildJSON(uuid, url), { status: 511, headers: { 'Content-Type': 'application/json' } });
+        return new Response(buildJSON(uuid, env.zeroTrustLoginPage), { status: 511, headers: { 'Content-Type': 'application/json' } });
     }
     return new Response(buildHTML(uuid, url), { status: 511, headers: { 'Content-Type': 'text/html' } });
 };
