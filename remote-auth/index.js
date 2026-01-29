@@ -117,7 +117,7 @@ const handleRequest = async (request) => {
     console.debug(redirectLoginURL);
 
     const url = new URL(request.url);
-    const isAPIRequest = request.headers.get('Accept')?.includes('application/json') || url.pathname.startsWith('/api/');
+    const isAPIRequest = request.headers.get('Accept')?.includes('application/json') || url.pathname.startsWith('/api/') || url.pathname.startsWith('/trpc/');
 
     try {
         // build url
