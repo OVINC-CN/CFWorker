@@ -168,6 +168,13 @@ const handleRequest = async (request) => {
             headers: request.headers,
             redirect: 'manual',
             body: request.body,
+            eo: {
+                timeoutSetting: {
+                    connectTimeout: 300 * 1000,
+                    readTimeout: 300 * 1000,
+                    writeTimeout: 300 * 1000,
+                },
+            },
         });
     } catch (e) {
         console.error(e);
