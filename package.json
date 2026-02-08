@@ -1,5 +1,5 @@
 {
-  "name": "cfworker",
+  "name": "edgeworker",
   "version": "1.0.0",
   "description": "Cloudflare Worker scripts",
   "type": "module",

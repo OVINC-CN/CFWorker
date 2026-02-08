@@ -1,14 +1,14 @@
-<h1 align="center">CFWorker</h1>
+<h1 align="center">EdgeWorker</h1>
 
 <p align="center">
-  <a href="https://github.com/OVINC-CN/CFWorker/blob/main/LICENSE">
-    <img src="https://img.shields.io/github/license/OVINC-CN/CFWorker" alt="License">
+  <a href="https://github.com/OVINC-CN/EdgeWorker/blob/main/LICENSE">
+    <img src="https://img.shields.io/github/license/OVINC-CN/EdgeWorker" alt="License">
   </a>
-  <a href="https://github.com/OVINC-CN/CFWorker/stargazers">
-    <img src="https://img.shields.io/github/stars/OVINC-CN/CFWorker" alt="Stars">
+  <a href="https://github.com/OVINC-CN/EdgeWorker/stargazers">
+    <img src="https://img.shields.io/github/stars/OVINC-CN/EdgeWorker" alt="Stars">
   </a>
-  <a href="https://github.com/OVINC-CN/CFWorker/issues">
-    <img src="https://img.shields.io/github/issues/OVINC-CN/CFWorker" alt="Issues">
+  <a href="https://github.com/OVINC-CN/EdgeWorker/issues">
+    <img src="https://img.shields.io/github/issues/OVINC-CN/EdgeWorker" alt="Issues">
   </a>
 </p>
 
@@ -83,8 +83,8 @@ https://your-worker.your-subdomain.workers.dev
 1. **克隆仓库**
 
 ```bash
-git clone https://github.com/OVINC-CN/CFWorker.git
-cd CFWorker
+git clone https://github.com/OVINC-CN/EdgeWorker.git
+cd EdgeWorker
 ```
 
 2. **进入 Worker 目录**
@@ -140,7 +140,7 @@ curl -X POST http://localhost:8787 \
 ### 项目结构
 
 ```
-CFWorker/
+EdgeWorker/
 ├── LICENSE
 ├── README.md             # 英文文档
 ├── README_zh.md          # 中文文档
